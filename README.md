@@ -12,6 +12,8 @@ Maximum 1024 hosts per scan.
 2. Open the **Actions** tab, choose **Build Android APK**, press **Run workflow**.
 3. After a few minutes download **RemoteManagementCheck-apk** from the run page, unzip it,
    and install `RemoteManagementCheck.apk` on the phone (allow "Install unknown apps" once).
+   The APK is signed with the key in `app/release.jks`, so new versions install over the old one.
+   Keep the repository PRIVATE (the signing key is inside it).
 
 The phone must be on the same network as the devices (WiFi / VPN) to reach private IPs.
 Use only on devices in your own network.
