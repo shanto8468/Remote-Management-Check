@@ -15,9 +15,21 @@ android {
         versionName = "1.0"
     }
 
+    // One fixed signing key: every build is signed the same way, so a new version
+    // installs directly over the old one (no uninstall needed).
+    signingConfigs {
+        create("release") {
+            storeFile = file("release.jks")
+            storePassword = "dY7ZbjpZVAOgJgVJ4P8jL7"
+            keyAlias = "rmcheck"
+            keyPassword = "dY7ZbjpZVAOgJgVJ4P8jL7"
+        }
+    }
+
     buildTypes {
         release {
             isMinifyEnabled = false
+            signingConfig = signingConfigs.getByName("release")
         }
     }
     compileOptions {
