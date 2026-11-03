@@ -12,6 +12,27 @@ jobs:
       - name: Checkout
         uses: actions/checkout@v4
 
+      - name: Find and check project files
+        id: proj
+        run: |
+          SETTINGS=$(find . -name settings.gradle.kts -not -path "./.git/*" | head -n 1)
+          if [ -z "$SETTINGS" ]; then
+            echo "::error::settings.gradle.kts not found. Upload ALL project files to the repository."
+            exit 1
+          fi
+          DIR=$(dirname "$SETTINGS")
+          echo "Project folder: $DIR"
+          echo "dir=$DIR" >> "$GITHUB_OUTPUT"
+          echo "--- files found in the project folder ---"
+          find "$DIR" -type f -not -path "*/.git/*" | sort
+          for f in app/build.gradle.kts app/src/main/AndroidManifest.xml app/src/main/java/com/rmcheck/app/MainActivity.kt; do
+            if [ ! -f "$DIR/$f" ]; then
+              echo "::error::Missing file: $f  - the 'app' folder was not uploaded to GitHub. Upload the whole 'app' folder."
+              exit 1
+            fi
+          done
+          echo "All required files are present."
+
       - name: Set up JDK 17
         uses: actions/setup-java@v4
         with:
@@ -24,14 +45,16 @@ jobs:
           gradle-version: "8.9"
 
       - name: Build debug APK
+        working-directory: ${{ steps.proj.outputs.dir }}
         run: gradle assembleDebug --no-daemon --stacktrace
 
       - name: Rename APK
+        working-directory: ${{ steps.proj.outputs.dir }}
         run: cp app/build/outputs/apk/debug/app-debug.apk RemoteManagementCheck.apk
 
       - name: Upload APK
         uses: actions/upload-artifact@v4
         with:
           name: RemoteManagementCheck-apk
-          path: RemoteManagementCheck.apk
+          path: ${{ steps.proj.outputs.dir }}/RemoteManagementCheck.apk
           if-no-files-found: error
