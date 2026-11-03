@@ -25,7 +25,7 @@ jobs:
           echo "dir=$DIR" >> "$GITHUB_OUTPUT"
           echo "--- files found in the project folder ---"
           find "$DIR" -type f -not -path "*/.git/*" | sort
-          for f in app/build.gradle.kts app/src/main/AndroidManifest.xml app/src/main/java/com/rmcheck/app/MainActivity.kt; do
+          for f in app/build.gradle.kts app/release.jks app/src/main/AndroidManifest.xml app/src/main/java/com/rmcheck/app/MainActivity.kt; do
             if [ ! -f "$DIR/$f" ]; then
               echo "::error::Missing file: $f  - the 'app' folder was not uploaded to GitHub. Upload the whole 'app' folder."
               exit 1
@@ -44,13 +44,13 @@ jobs:
         with:
           gradle-version: "8.9"
 
-      - name: Build debug APK
+      - name: Build signed release APK
         working-directory: ${{ steps.proj.outputs.dir }}
-        run: gradle assembleDebug --no-daemon --stacktrace
+        run: gradle assembleRelease --no-daemon --stacktrace
 
       - name: Rename APK
         working-directory: ${{ steps.proj.outputs.dir }}
-        run: cp app/build/outputs/apk/debug/app-debug.apk RemoteManagementCheck.apk
+        run: cp app/build/outputs/apk/release/app-release.apk RemoteManagementCheck.apk
 
       - name: Upload APK
         uses: actions/upload-artifact@v4
